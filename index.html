@@ -1,0 +1,498 @@
+<!doctype html>
+<html lang="pt">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Desafio OSINT | Lisbon Business School</title>
+  <style>
+    :root {
+      --ink: #121826;
+      --muted: #5e6a7d;
+      --line: #d9dee8;
+      --paper: #ffffff;
+      --field: #f3f5f8;
+      --brand: #0c2340;
+      --accent: #99e61c;
+      --accent-dark: #66a80f;
+      --warning: #ff8a00;
+      --wrong: #ffe6e6;
+      --wrong-ink: #a62020;
+      --shadow: 0 18px 50px rgba(12, 35, 64, .12);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background:
+        linear-gradient(180deg, rgba(12, 35, 64, .07), rgba(255, 255, 255, 0) 360px),
+        #f7f9fc;
+      font-family: Arial, Helvetica, sans-serif;
+      letter-spacing: 0;
+    }
+
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      padding: 18px clamp(18px, 5vw, 64px);
+      border-bottom: 1px solid rgba(217, 222, 232, .78);
+      background: rgba(255, 255, 255, .92);
+      backdrop-filter: blur(12px);
+    }
+
+    .logo {
+      display: block;
+      width: min(206px, 48vw);
+      height: auto;
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      gap: clamp(14px, 3vw, 34px);
+      color: var(--brand);
+      font-size: 13px;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .nav span {
+      opacity: .78;
+    }
+
+    main {
+      width: min(1120px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: clamp(34px, 6vw, 72px) 0 56px;
+    }
+
+    .intro {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 28px;
+      align-items: end;
+      margin-bottom: 30px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    h1 {
+      margin: 0 0 12px;
+      color: var(--brand);
+      font-size: clamp(34px, 6vw, 64px);
+      font-weight: 400;
+      line-height: .98;
+    }
+
+    .intro p {
+      max-width: 680px;
+      margin: 0;
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.65;
+    }
+
+    .score {
+      min-width: 150px;
+      padding: 14px 18px;
+      border: 1px solid var(--line);
+      background: var(--paper);
+      box-shadow: var(--shadow);
+      text-align: center;
+    }
+
+    .score strong {
+      display: block;
+      color: var(--brand);
+      font-size: 34px;
+      font-weight: 400;
+      line-height: 1;
+    }
+
+    .score span {
+      color: var(--muted);
+      font-size: 12px;
+      text-transform: uppercase;
+    }
+
+    .challenge {
+      display: grid;
+      gap: 22px;
+    }
+
+    .question {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 184px 48px;
+      gap: 16px;
+      align-items: end;
+      padding: 22px 0;
+      border-bottom: 1px solid rgba(217, 222, 232, .72);
+    }
+
+    .question label {
+      display: block;
+      grid-column: 1 / -1;
+      margin-bottom: 2px;
+      color: #061226;
+      font-size: 16px;
+      line-height: 1.4;
+    }
+
+    input {
+      width: 100%;
+      min-height: 42px;
+      border: 1px solid #cfd6e2;
+      border-radius: 4px;
+      background: var(--field);
+      color: var(--brand);
+      font: inherit;
+      padding: 10px 16px;
+      outline: none;
+      transition: border-color .18s ease, box-shadow .18s ease, background .18s ease;
+    }
+
+    input:focus {
+      border-color: var(--brand);
+      background: #fff;
+      box-shadow: 0 0 0 3px rgba(12, 35, 64, .12);
+    }
+
+    input.correct {
+      border-color: rgba(102, 168, 15, .7);
+      background: #f8fff0;
+    }
+
+    input.wrong {
+      border-color: rgba(166, 32, 32, .38);
+      background: var(--wrong);
+    }
+
+    .status {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 42px;
+      padding: 0 18px;
+      border: 0;
+      border-radius: 4px;
+      background: #e7ebf2;
+      color: var(--muted);
+      font: inherit;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .status.correct {
+      background: var(--accent);
+      color: #061226;
+    }
+
+    .status.wrong {
+      background: var(--wrong);
+      color: var(--wrong-ink);
+    }
+
+    .hint {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 48px;
+      min-height: 42px;
+      border: 0;
+      border-radius: 6px;
+      background: var(--warning);
+      color: #061226;
+      font-size: 18px;
+      cursor: pointer;
+    }
+
+    .hint[hidden] {
+      display: none;
+    }
+
+    .hint:focus-visible {
+      outline: 3px solid rgba(255, 138, 0, .35);
+      outline-offset: 2px;
+    }
+
+    .hint-text {
+      grid-column: 1 / -1;
+      display: none;
+      margin-top: -4px;
+      padding: 12px 14px;
+      border-left: 3px solid var(--warning);
+      background: #fff7ec;
+      color: #4c3000;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .hint-text.open {
+      display: block;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: flex-end;
+      margin-top: 30px;
+    }
+
+    .primary,
+    .secondary {
+      min-height: 44px;
+      border: 1px solid var(--brand);
+      border-radius: 4px;
+      padding: 0 22px;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .primary {
+      background: var(--brand);
+      color: #fff;
+    }
+
+    .secondary {
+      background: transparent;
+      color: var(--brand);
+    }
+
+    .complete {
+      display: none;
+      margin-top: 26px;
+      padding: 18px 20px;
+      border: 1px solid rgba(102, 168, 15, .42);
+      background: #f6ffe9;
+      color: #254500;
+      line-height: 1.55;
+    }
+
+    .complete.open {
+      display: block;
+    }
+
+    @media (max-width: 760px) {
+      .site-header {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .nav {
+        width: 100%;
+        justify-content: space-between;
+        gap: 10px;
+        font-size: 11px;
+      }
+
+      .intro {
+        grid-template-columns: 1fr;
+      }
+
+      .score {
+        width: 100%;
+      }
+
+      .question {
+        grid-template-columns: 1fr 48px;
+        gap: 12px;
+      }
+
+      .question input {
+        grid-column: 1 / -1;
+      }
+
+      .status {
+        grid-column: 1;
+      }
+
+      .hint {
+        grid-column: 2;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <img
+      class="logo"
+      src="assets/lbs-logo.png"
+      alt="Lisbon Business School">
+    <nav class="nav" aria-label="Navegação principal">
+      <span>OSINT</span>
+      <span>Challenge</span>
+      <span>LBS</span>
+    </nav>
+  </header>
+
+  <main>
+    <section class="intro" aria-labelledby="page-title">
+      <div>
+        <h1 id="page-title">Desafio OSINT</h1>
+        <p>Responde às perguntas abaixo. As respostas são validadas localmente e aceitam maiúsculas ou minúsculas.</p>
+      </div>
+      <div class="score" aria-live="polite">
+        <strong id="score">0/7</strong>
+        <span>respostas certas</span>
+      </div>
+    </section>
+
+    <form class="challenge" id="challenge" autocomplete="off" novalidate>
+      <div class="question" data-answer="77af778b51abd4a3c51c5ddd97204a9c3ae614ebccb75a606c3b6865aed6744e">
+        <label for="q1">Qual é o avatar deste utilizador?</label>
+        <input id="q1" name="q1" type="text" spellcheck="false" inputmode="text">
+        <output class="status" for="q1">Por validar</output>
+        <button class="hint" type="button" aria-label="Mostrar pista" title="Mostrar pista">?</button>
+        <p class="hint-text">Procura a imagem ou descrição associada ao perfil do utilizador.</p>
+      </div>
+
+      <div class="question" data-answer="6089854c94ca5454b76be6752c562901a985f64c9a946f62976aeab593b83161">
+        <label for="q2">Em que cidade está esta pessoa?</label>
+        <input id="q2" name="q2" type="text" spellcheck="false" inputmode="text">
+        <output class="status" for="q2">Por validar</output>
+        <button class="hint" type="button" aria-label="Mostrar pista" title="Mostrar pista">?</button>
+        <p class="hint-text">Cruza publicações e metadados públicos para confirmar a localização.</p>
+      </div>
+
+      <div class="question" data-answer="6aba7440a98cab8c8eb401b4183fc7a74d3d4a2f7c0d3b004a9ba65efa648c69">
+        <label for="q3">Qual é o SSID do WAP ao qual ele se ligou?</label>
+        <input id="q3" name="q3" type="text" spellcheck="false" inputmode="text">
+        <output class="status" for="q3">Por validar</output>
+        <button class="hint" type="button" hidden aria-label="Mostrar pista" title="Mostrar pista">?</button>
+        <p class="hint-text"></p>
+      </div>
+
+      <div class="question" data-answer="3e2138eefdfcb71ae28c09729ff48b818f1841d94edd44539cf4db53541cc482">
+        <label for="q4">Qual é o endereço de email pessoal dele?</label>
+        <input id="q4" name="q4" type="email" spellcheck="false" inputmode="email">
+        <output class="status" for="q4">Por validar</output>
+        <button class="hint" type="button" hidden aria-label="Mostrar pista" title="Mostrar pista">?</button>
+        <p class="hint-text"></p>
+      </div>
+
+      <div class="question" data-answer="c0b0109d9439de57fe3cf03abeccbc52f4c98170c732d3b69af5e6395ace574e">
+        <label for="q5">Em que site encontraste o endereço de email dele?</label>
+        <input id="q5" name="q5" type="text" spellcheck="false" inputmode="text">
+        <output class="status" for="q5">Por validar</output>
+        <button class="hint" type="button" hidden aria-label="Mostrar pista" title="Mostrar pista">?</button>
+        <p class="hint-text"></p>
+      </div>
+
+      <div class="question" data-answer="bd732730bd39834d83bf92a114960180d3bd4a6f1309307165e6f30ed9846fdd">
+        <label for="q6">Onde é que ele passou férias?</label>
+        <input id="q6" name="q6" type="text" spellcheck="false" inputmode="text">
+        <output class="status" for="q6">Por validar</output>
+        <button class="hint" type="button" aria-label="Mostrar pista" title="Mostrar pista">?</button>
+        <p class="hint-text">Procura referências de viagem, imagens partilhadas ou publicações antigas.</p>
+      </div>
+
+      <div class="question" data-answer="210e96dc235ebd997a4475cd271f8952ef3659e45389aa72b1ae4fa23751c866">
+        <label for="q7">Qual é a palavra-passe da pessoa?</label>
+        <input id="q7" name="q7" type="text" spellcheck="false" inputmode="text">
+        <output class="status" for="q7">Por validar</output>
+        <button class="hint" type="button" aria-label="Mostrar pista" title="Mostrar pista">?</button>
+        <p class="hint-text">Segue a cadeia de pistas até às contas e artefactos expostos publicamente.</p>
+      </div>
+
+      <div class="actions">
+        <button class="secondary" type="reset">Limpar</button>
+        <button class="primary" type="submit">Validar respostas</button>
+      </div>
+    </form>
+
+    <section class="complete" id="complete" aria-live="polite">
+      Todas as respostas estão corretas. Desafio concluído.
+    </section>
+  </main>
+
+  <script>
+    const form = document.querySelector("#challenge");
+    const score = document.querySelector("#score");
+    const complete = document.querySelector("#complete");
+    const questions = [...document.querySelectorAll(".question")];
+
+    const normalize = (value) => value.trim().replace(/\s+/g, " ").toLocaleLowerCase("en-US");
+
+    const digest = async (value) => {
+      const bytes = new TextEncoder().encode(normalize(value));
+      const hash = await crypto.subtle.digest("SHA-256", bytes);
+      return [...new Uint8Array(hash)].map((byte) => byte.toString(16).padStart(2, "0")).join("");
+    };
+
+    const setState = (question, state) => {
+      const input = question.querySelector("input");
+      const status = question.querySelector(".status");
+
+      input.classList.remove("correct", "wrong");
+      status.classList.remove("correct", "wrong");
+
+      if (state === "empty") {
+        status.textContent = "Por validar";
+        return;
+      }
+
+      input.classList.add(state);
+      status.classList.add(state);
+      status.textContent = state === "correct" ? "✓ Resposta correta" : "Tentar de novo";
+    };
+
+    const validate = async () => {
+      let correct = 0;
+
+      await Promise.all(questions.map(async (question) => {
+        const input = question.querySelector("input");
+
+        if (!input.value.trim()) {
+          setState(question, "empty");
+          return;
+        }
+
+        const isCorrect = await digest(input.value) === question.dataset.answer;
+        setState(question, isCorrect ? "correct" : "wrong");
+        correct += isCorrect ? 1 : 0;
+      }));
+
+      score.textContent = `${correct}/${questions.length}`;
+      complete.classList.toggle("open", correct === questions.length);
+    };
+
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      validate();
+    });
+
+    form.addEventListener("input", (event) => {
+      const question = event.target.closest(".question");
+      if (question) {
+        setState(question, "empty");
+        complete.classList.remove("open");
+      }
+    });
+
+    form.addEventListener("reset", () => {
+      window.setTimeout(() => {
+        questions.forEach((question) => setState(question, "empty"));
+        score.textContent = `0/${questions.length}`;
+        complete.classList.remove("open");
+      });
+    });
+
+    document.querySelectorAll(".hint").forEach((button) => {
+      button.addEventListener("click", () => {
+        button.closest(".question").querySelector(".hint-text").classList.toggle("open");
+      });
+    });
+  </script>
+</body>
+</html>

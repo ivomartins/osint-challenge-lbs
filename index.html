@@ -349,7 +349,7 @@
     </section>
 
     <form class="challenge" id="challenge" autocomplete="off" novalidate>
-      <div class="question" data-answer="77af778b51abd4a3c51c5ddd97204a9c3ae614ebccb75a606c3b6865aed6744e">
+      <div class="question" data-answer="77af778b51abd4a3c51c5ddd97204a9c3ae614ebccb75a606c3b6865aed6744e d4e8973e04e657a4c6166748380356dcecd142b56137bd3a9e6d0d75744a1482">
         <label for="q1">Qual é o avatar deste utilizador?</label>
         <input id="q1" name="q1" type="text" spellcheck="false" inputmode="text">
         <output class="status" for="q1">Por validar</output>
@@ -357,7 +357,7 @@
         <p class="hint-text">Procura a imagem ou descrição associada ao perfil do utilizador.</p>
       </div>
 
-      <div class="question" data-answer="6089854c94ca5454b76be6752c562901a985f64c9a946f62976aeab593b83161">
+      <div class="question" data-answer="6089854c94ca5454b76be6752c562901a985f64c9a946f62976aeab593b83161 1e98d50938343d85b7cc790b92e462d21940c7386a7e0c9a529e3771c47d3773">
         <label for="q2">Em que cidade está esta pessoa?</label>
         <input id="q2" name="q2" type="text" spellcheck="false" inputmode="text">
         <output class="status" for="q2">Por validar</output>
@@ -389,7 +389,7 @@
         <p class="hint-text"></p>
       </div>
 
-      <div class="question" data-answer="bd732730bd39834d83bf92a114960180d3bd4a6f1309307165e6f30ed9846fdd">
+      <div class="question" data-answer="bd732730bd39834d83bf92a114960180d3bd4a6f1309307165e6f30ed9846fdd 9323d357c20efec9d9f91b7f107d35c1b20bf5e722375ea96351ff81576c362f">
         <label for="q6">Onde é que ele passou férias?</label>
         <input id="q6" name="q6" type="text" spellcheck="false" inputmode="text">
         <output class="status" for="q6">Por validar</output>
@@ -458,7 +458,7 @@
           return;
         }
 
-        const isCorrect = await digest(input.value) === question.dataset.answer;
+        const isCorrect = question.dataset.answer.split(" ").includes(await digest(input.value));
         setState(question, isCorrect ? "correct" : "wrong");
         correct += isCorrect ? 1 : 0;
       }));
